@@ -1,6 +1,6 @@
 import * as request from 'superagent';
 
-describe('When an endpoint GET /users/:username/learning-objects/:learningObjectID/outcomesr is invoked', () => {
+describe('When the endpoint GET /users/:username/learning-objects/:learningObjectID/outcomesr is invoked', () => {
 
   describe('and the specified username abides to the schema requirements', () => {
 
