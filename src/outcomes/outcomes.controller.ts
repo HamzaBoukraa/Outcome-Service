@@ -67,7 +67,7 @@ export class OutcomesController {
   }
 
   @ApiNoContentResponse({ description: 'No Content' })
-  @ApiBadRequestResponse({ description: 'Invalid bloom || Invalid text || Invalid verb || Invalid username || Invalid Learning Object ID || Invalid outcome ID'})
+  @ApiBadRequestResponse({ description: 'Invalid bloom || Invalid text || Invalid verb || Invalid username'})
   @ApiUnauthorizedResponse({ description: 'If the requester is not signed in' })
   @ApiForbiddenResponse({ description: 'If Learning Object is unreleased and requester is not the author || If Learning Object is in waiting, review, proofing and requester is not privileged || If Learning Object is released' })
   @ApiNotFoundResponse({ description: 'Username not found || Learning Object not found || Outcome not found' })

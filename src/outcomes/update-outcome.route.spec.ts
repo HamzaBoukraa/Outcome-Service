@@ -1,7 +1,7 @@
 import * as request from 'superagent'
 
-describe('When the endpoint POST /users/:username/learning-objects/:learningObjectID/outcomes is invoked', () => {
-    
+describe('When the endpoint PATCH /users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID is invoked', () => {
+
     describe('and all of the parameters abide to the schema requirements', () => {
 
         describe('and the requester has a valid token', () => {
@@ -12,13 +12,36 @@ describe('When the endpoint POST /users/:username/learning-objects/:learningObje
 
                     describe('and the specified Learning Object ID belongs to an existing Learning Object', () => {
 
-                        it('should return HTTP status code 201', () => {
+                        describe('and the specified Outcome ID belongs to an existing Outcome', () => {
 
+                            describe('and the requested update will not result in a duplicate resource', () => {
+
+                                it('should return HTTP status code 204', () => {
+
+                                });
+
+                            });
+
+                            describe('and the requested update will result in a duplicate resource', () => {
+
+                                it('should return HTTP status code 409', () => {
+
+                                });
+                            });
+
+                        });
+
+                        describe('and the specified Outcome ID does not belong to an existing Outcome', () => {
+
+                            it('should return HTTP status code 404', () => {
+
+                            });
+                            
                         });
 
                     });
 
-                    describe('and the specified Leearning Object ID does not belong to an existing Learning Object', () => {
+                    describe('and the specified Learning Object ID does not belong to an existing Learning Object', () => {
 
                         it('should return HTTP status code 404', () => {
 
@@ -28,7 +51,7 @@ describe('When the endpoint POST /users/:username/learning-objects/:learningObje
 
                 });
 
-                describe('and the specified user does not belong to an existing user' ,() => {
+                describe('and the specified username does not belong to an existing user', () => {
 
                     it('should return HTTP status code 404', () => {
 
@@ -42,16 +65,17 @@ describe('When the endpoint POST /users/:username/learning-objects/:learningObje
 
                 describe('and the Learning Object has a status of unreleased', () => {
 
-                    describe('and the requester is not the author of the specified Learning Object', () => {
+                    describe('and te requester is not the author of the Learning Object', () => {
 
                         it('should return HTTP status code 403', () => {
 
                         });
+
                     });
 
                 });
 
-                describe('and the Learning Object has a stauts of waiting', () => {
+                describe('and the Learning Object has a status of waiting', () => {
 
                     describe('and the requester is not an admin or editor', () => {
 
@@ -63,7 +87,7 @@ describe('When the endpoint POST /users/:username/learning-objects/:learningObje
 
                 });
 
-                describe('and the Learning Object has a status of review' ,() => {
+                describe('and the Learning Object has a status of review', () => {
 
                     describe('and the requester is not an admin or editor', () => {
 
@@ -76,11 +100,10 @@ describe('When the endpoint POST /users/:username/learning-objects/:learningObje
                 });
 
                 describe('and the Learning Object has a status of proofing', () => {
-
+                    
                     describe('and the requester is not an admin or editor', () => {
 
                         it('should return HTTP status code 403', () => {
-
 
                         });
 
@@ -90,7 +113,6 @@ describe('When the endpoint POST /users/:username/learning-objects/:learningObje
 
             });
 
-
         });
 
         describe('and the requester does not have a valid token', () => {
@@ -98,7 +120,7 @@ describe('When the endpoint POST /users/:username/learning-objects/:learningObje
             it('should return HTTP status code 401', () => {
 
             });
-            
+
         });
 
     });
@@ -252,5 +274,3 @@ describe('When the endpoint POST /users/:username/learning-objects/:learningObje
     });
 
 });
-
-
