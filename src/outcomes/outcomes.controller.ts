@@ -7,6 +7,7 @@ import { OutcomesService } from './outcomes.service';
 
 import * as request from 'superagent';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { RouteParameterDTO } from 'src/DTO/RouteParameter.DTO';
 
 @Controller()
 export class OutcomesController {
@@ -20,29 +21,11 @@ export class OutcomesController {
   @Get('/users/:username/learning-objects/:learningObjectID/outcomes')
   @HttpCode(200)
   async getOutcomes(@Param('username') username: string, @Param('learningObjectID') learningObjectID: string): Promise<OutcomeReadDTO[]> {
-    this.checkForValidUsername(username);
 
-    try {
-      const user = await request
-      .get(`http://localhost:4000/users/${username}/profile`)
-      .set('Accept', 'application/json')
 
-    } catch (error) {
-      throw new NotFoundException('The specified user was not found');
-    };
+    
 
-    try {
-      const learningObject = await request
-      .get(`http://localhost:5000/users/${username}/learning-objects/${learningObjectID}/outcomes`)
-      .set('Accept', 'application/json')
-
-    } catch (error) {
-      if (error.status === 401) {
-        throw new ForbiddenException('You do not have permission to view the reuested Learning Object');
-      } else {
-        throw new NotFoundException('The specified Learning Object was not found');
-      }
-    };
+  
     
     const outcomes = await this.outcomeService.findAll();
     return outcomes;
@@ -72,11 +55,15 @@ export class OutcomesController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(204)
-  async updateOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param('username') username: string, @Param('learningObjectID') learningObjectID: string, @Param('outcomeID') outcomeID: string): Promise<void> {
+  async updateOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param() routeParameterDTO: RouteParameterDTO): Promise<void> {
 
-    this.checkForValidUsername(username);
+    const user = await this.getUser(routeParameterDTO.username);
 
-    await this.outcomeService.update(outcomeWriteDTO, outcomeID);
+    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID);
+
+    // this.checkForValidPermission(user, learningObject)
+
+    await this.outcomeService.update(outcomeWriteDTO, routeParameterDTO.outcomeID);
   }
 
   @ApiNoContentResponse({ description: 'No Content' })
@@ -87,7 +74,6 @@ export class OutcomesController {
   @Delete('/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID')
   @HttpCode(204)
   async deleteOutcome(@Param('username') username: string, @Param('learningObjectID') learningObjectID: string, @Param('outcomeID') outcomeID: string): Promise<void> {
-    this.checkForValidUsername(username);
 
     await this.outcomeService.delete(outcomeID);
   }
@@ -103,7 +89,6 @@ export class OutcomesController {
   @UsePipes(ValidationPipe)
   @HttpCode(204)
   async addMapping(@Body() mappingWriteDTO: MappingWriteDTO, @Param('username') username: string, @Param('learningObjectID') learningObjectID: string, @Param('outcomeID') outcomeID: string): Promise<void> {
-    this.checkForValidUsername(username);
 
     await this.outcomeService.addMapping(mappingWriteDTO.guidelineID, outcomeID);
   }
@@ -116,21 +101,38 @@ export class OutcomesController {
   @Delete('/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID/mappings/:guidelineID')
   @HttpCode(204)
   async deleteMapping(@Param('username') username: string, @Param('learningObjectID') learningObjectID: string, @Param('outcomeID') outcomeID: string, @Param('guidelineID') guidelineID: string): Promise<void> {
-    this.checkForValidUsername(username);
 
     await this.outcomeService.deleteMapping(outcomeID, guidelineID);
   }
 
-  checkForValidUsername(username: string): void {
+  async getUser(username: string) {
+    try {
+      const response = await request
+        .get(`http://localhost:4000/users/${username}/profile`)
+        .set('Accept', 'application/json')
 
-    if (username.length > 20) {
-      throw new BadRequestException('Usernames cannot contain more than 20 characters');
-    }
+      return response.body;
 
-    if (username.length < 3) {
-      throw new  BadRequestException('Usernames must be at least 3 characters');
-    }
+    } catch (error) {
+      throw new NotFoundException('The specified user was not found');
+    };
+  }
 
+  async getLearningObject(username: string, learningObjectID: string) {
+    try {
+      const response = await request
+        .get(`http://localhost:5000/users/${username}/learning-objects/${learningObjectID}/outcomes`)
+        .set('Accept', 'application/json')
+
+      return response.body;
+
+    } catch (error) {
+      if (error.status === 401) {
+        throw new ForbiddenException('You do not have permission to view the reuested Learning Object');
+      } else {
+        throw new NotFoundException('The specified Learning Object was not found');
+      }
+    };
   }
 
 }

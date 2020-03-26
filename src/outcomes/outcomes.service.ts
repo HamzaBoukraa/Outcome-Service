@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { OutcomeWriteDTO } from '../DTO/OutcomeWrite.DTO';
 import { OutcomeReadDTO } from '../DTO/OutcomeRead.DTO';
 
@@ -18,7 +18,7 @@ export class OutcomesService {
     }
 
     async update(outcomeWriteDTO: OutcomeWriteDTO, outcomeID: string): Promise<void> {
-        await this.outcomeModel.updateOne({ _id: outcomeID }, { $set: { outcomeWriteDTO }});
+        await this.outcomeModel.updateOne({ _id: new Types.ObjectId(outcomeID) }, { $set: { outcomeWriteDTO }});
     }
 
     async delete(outcomeID: string) {

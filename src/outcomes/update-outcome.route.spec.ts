@@ -1,5 +1,13 @@
 import * as request from 'superagent'
 
+function getBearerToken() {
+    return 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhOTU4MzQwMTQwNWNiMDUzMjcyY2VkMSIsInVzZXJuYW1lIjoibnZpc2FsMSIsIm5hbWUiOiJuaWNrIHZpc2FsbGkiLCJlbWFpbCI6Im52aXNhbDFAc3R1ZGVudHMudG93c29uLmVkdSIsIm9yZ2FuaXphdGlvbiI6InRvd3NvbiB1bml2ZXJzaXR5IiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwiYWNjZXNzR3JvdXBzIjpbImFkbWluIiwiIl0sImlhdCI6MTU4NTE1NDEzNSwiZXhwIjoxNTg1MjQwNTM1LCJhdWQiOiJudmlzYWwxIiwiaXNzIjoiVEhJU19JU19BTl9JU1NVRVIifQ.dx07cX7wX0qP0-LSj-Pyq50ta67F26RPStWSoRhqqms';
+}
+
+function getUnauthorizedBearerToken() {
+    return 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlNTUzM2MxZjgyMGExMDAxMWE0NTYxOSIsInVzZXJuYW1lIjoibnZpc2FsMTIzOCIsIm5hbWUiOiJuaWNrIHZpc2FsbGkiLCJlbWFpbCI6Im52aXNhbDFAc3R1ZGVudHMudG93c29uLmVkdXV1dSIsIm9yZ2FuaXphdGlvbiI6ImJhbHRpbW9yZSIsImVtYWlsVmVyaWZpZWQiOnRydWUsImlhdCI6MTU4NTIzNTYzMiwiZXhwIjoxNTg1MzIyMDMyLCJhdWQiOiJudmlzYWwxMjM4IiwiaXNzIjoiVEhJU19JU19BTl9JU1NVRVIifQ.ZNLn8JA16g6DqLpdDxm2eDLp9uE8SNNHQq1iiMpdwY8';
+}
+
 describe('When the endpoint PATCH /users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID is invoked', () => {
 
     describe('and all of the parameters abide to the schema requirements', () => {
@@ -67,7 +75,30 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
                     describe('and te requester is not the author of the Learning Object', () => {
 
-                        it('should return HTTP status code 403', () => {
+                        it('should return HTTP status code 403', async () => {
+
+                        const body = {
+                            bloom: 'remember & understand',
+                            text: 'string',
+                            verb: 'string',
+                        }
+
+                        const username = 'ballen15';
+                        const learningObjectID = '5ad8f5a6824dd17351adf1e1';
+                        const outcomeID = '5ad8f5a6824dd17351adf1e1';
+        
+                        try {
+                            const response = await request
+                                .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                .send(body)
+                                .set('Accept', 'application/json')
+                                .set('Authorization', getBearerToken())
+        
+                            // automatic failure if response is 200 series
+                            expect(true).toBe(false);
+                        } catch (error) {
+                            expect(error.status).toBe(403);
+                        }
 
                         });
 
@@ -79,7 +110,30 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
                     describe('and the requester is not an admin or editor', () => {
 
-                        it('should return HTTP status code 403', () => {
+                        it('should return HTTP status code 403', async () => {
+
+                            const body = {
+                                bloom: 'remember & understand',
+                                text: 'string',
+                                verb: 'string',
+                            }
+
+                            const username = 'amangle'
+                            const learningObjectID = '5ae4b4b208e67a62277ac633';
+                            const outcomeID = '5ae4b4b208e67a62277ac633';
+            
+                            try {
+                                const response = await request
+                                    .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                    .send(body)
+                                    .set('Accept', 'application/json')
+                                    .set('Authorization', getUnauthorizedBearerToken())
+            
+                                // automatic failure if response is 200 series
+                                expect(true).toBe(false);
+                            } catch (error) {
+                                expect(error.status).toBe(403);
+                            }
 
                         });
 
@@ -91,7 +145,33 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
                     describe('and the requester is not an admin or editor', () => {
 
-                        it('should return HTTP status code 403', () => {
+                        it('should return HTTP status code 403', async () => {
+
+                            const body = {
+                                bloom: 'remember & understand',
+                                text: 'string',
+                                verb: 'string',
+                            }
+
+                            const username = 'amangle'
+
+                            // waiting ID, TODO: create Review document
+                            const learningObjectID = '5ae4b4b208e67a62277ac633';
+                            const outcomeID = '5ae4b4b208e67a62277ac633';
+            
+                            try {
+                                const response = await request
+                                    .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                    .send(body)
+                                    .set('Accept', 'application/json')
+                                    .set('Authorization', getUnauthorizedBearerToken())
+            
+                                // automatic failure if response is 200 series
+                                expect(true).toBe(false);
+                            } catch (error) {
+                                expect(error.status).toBe(403);
+                            }
+
 
                         });
 
@@ -103,7 +183,30 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                     
                     describe('and the requester is not an admin or editor', () => {
 
-                        it('should return HTTP status code 403', () => {
+                        it('should return HTTP status code 403', async () => {
+
+                            const body = {
+                                bloom: 'remember & understand',
+                                text: 'string',
+                                verb: 'string',
+                            }
+
+                            const username = 'latifurk'
+                            const learningObjectID = '5adfa9b0e5b8af01c535a0ab';
+                            const outcomeID = '5adfa9b0e5b8af01c535a0ab';
+            
+                            try {
+                                const response = await request
+                                    .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                    .send(body)
+                                    .set('Accept', 'application/json')
+                                    .set('Authorization', getUnauthorizedBearerToken())
+            
+                                // automatic failure if response is 200 series
+                                expect(true).toBe(false);
+                            } catch (error) {
+                                expect(error.status).toBe(403);
+                            }
 
                         });
 
@@ -117,7 +220,25 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
         describe('and the requester does not have a valid token', () => {
 
-            it('should return HTTP status code 401', () => {
+            it('should return HTTP status code 401', async () => {
+
+                const body = {
+                    bloom: 'string',
+                    text: 'string',
+                    verb: 'string',
+                }
+
+                try {
+                    const response = await request
+                        .patch(`http://localhost:3000/users/username/learning-objects/learningObjectID/outcomes/outcomeID`)
+                        .send(body)
+                        .set('Accept', 'application/json')
+
+                    // automatic failure if response is 200 series
+                    expect(true).toBe(false);
+                } catch (error) {
+                    expect(error.status).toBe(401);
+                }
 
             });
 
@@ -144,7 +265,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/username/learning-objects/learningObjectID/outcomes/outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhOTU4MzQwMTQwNWNiMDUzMjcyY2VkMSIsInVzZXJuYW1lIjoibnZpc2FsMSIsIm5hbWUiOiJuaWNrIHZpc2FsbGkiLCJlbWFpbCI6Im52aXNhbDFAc3R1ZGVudHMudG93c29uLmVkdSIsIm9yZ2FuaXphdGlvbiI6InRvd3NvbiB1bml2ZXJzaXR5IiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwiYWNjZXNzR3JvdXBzIjpbImFkbWluIiwiIl0sImlhdCI6MTU4NTE1NDEzNSwiZXhwIjoxNTg1MjQwNTM1LCJhdWQiOiJudmlzYWwxIiwiaXNzIjoiVEhJU19JU19BTl9JU1NVRVIifQ.dx07cX7wX0qP0-LSj-Pyq50ta67F26RPStWSoRhqqms')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -171,13 +292,11 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhOTU4MzQwMTQwNWNiMDUzMjcyY2VkMSIsInVzZXJuYW1lIjoibnZpc2FsMSIsIm5hbWUiOiJuaWNrIHZpc2FsbGkiLCJlbWFpbCI6Im52aXNhbDFAc3R1ZGVudHMudG93c29uLmVkdSIsIm9yZ2FuaXphdGlvbiI6InRvd3NvbiB1bml2ZXJzaXR5IiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwiYWNjZXNzR3JvdXBzIjpbImFkbWluIiwiIl0sImlhdCI6MTU4NTE1NDEzNSwiZXhwIjoxNTg1MjQwNTM1LCJhdWQiOiJudmlzYWwxIiwiaXNzIjoiVEhJU19JU19BTl9JU1NVRVIifQ.dx07cX7wX0qP0-LSj-Pyq50ta67F26RPStWSoRhqqms')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
                     } catch (error) {
-
-                        console.log(error);
                         expect(error.status).toBe(400);
                     }
                     
@@ -200,6 +319,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -226,6 +346,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -252,6 +373,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -282,6 +404,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -308,6 +431,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -334,6 +458,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -360,6 +485,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -386,6 +512,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -416,6 +543,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -442,6 +570,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -468,6 +597,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -494,6 +624,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -519,6 +650,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                         const response = await request
                             .patch(`http://localhost:3000/users/${username}/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -540,6 +672,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                         const response = await request
                             .patch(`http://localhost:3000/users/${username}/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .set('Accept', 'application/json')
+                            .set('Authorization', getBearerToken())
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
