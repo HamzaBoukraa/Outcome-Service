@@ -1,11 +1,12 @@
-import { Controller, Get, HttpCode, Post, UsePipes, ValidationPipe, Body, Patch, Delete, Param, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, HttpCode, Post, UsePipes, ValidationPipe, Body, Patch, Delete, Param, BadRequestException, NotFoundException, ForbiddenException, UnauthorizedException, Headers, UseGuards } from '@nestjs/common';
 import { ApiNoContentResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiOkResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiCreatedResponse, ApiBody, ApiConflictResponse } from '@nestjs/swagger';
-import { OutcomeReadDTO } from 'src/DTO/OutcomeRead.DTO';
-import { OutcomeWriteDTO } from 'src/DTO/OutcomeWrite.DTO';
-import { MappingWriteDTO } from 'src/DTO/MappingWrite.DTO';
+import { OutcomeReadDTO } from '../DTO/OutcomeRead.DTO';
+import { OutcomeWriteDTO } from '../DTO/OutcomeWrite.DTO';
+import { MappingWriteDTO } from '../DTO/MappingWrite.DTO';
 import { OutcomesService } from './outcomes.service';
 
 import * as request from 'superagent';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller()
 export class OutcomesController {
@@ -19,13 +20,7 @@ export class OutcomesController {
   @Get('/users/:username/learning-objects/:learningObjectID/outcomes')
   @HttpCode(200)
   async getOutcomes(@Param('username') username: string, @Param('learningObjectID') learningObjectID: string): Promise<OutcomeReadDTO[]> {
-    if (username.length > 20) {
-      throw new BadRequestException('Usernames cannot contain more than 20 characters');
-    }
-
-    if (username.length < 3) {
-      throw new  BadRequestException('Usernames must be at least 3 characters');
-    }
+    this.checkForValidUsername(username);
 
     try {
       const user = await request
@@ -74,9 +69,13 @@ export class OutcomesController {
   @ApiConflictResponse({ description: 'Update would create a duplicate' })
   @ApiBody({ type: OutcomeWriteDTO })
   @Patch('/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(204)
   async updateOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param('username') username: string, @Param('learningObjectID') learningObjectID: string, @Param('outcomeID') outcomeID: string): Promise<void> {
+
+    this.checkForValidUsername(username);
+
     await this.outcomeService.update(outcomeWriteDTO, outcomeID);
   }
 
@@ -88,6 +87,8 @@ export class OutcomesController {
   @Delete('/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID')
   @HttpCode(204)
   async deleteOutcome(@Param('username') username: string, @Param('learningObjectID') learningObjectID: string, @Param('outcomeID') outcomeID: string): Promise<void> {
+    this.checkForValidUsername(username);
+
     await this.outcomeService.delete(outcomeID);
   }
 
@@ -102,6 +103,8 @@ export class OutcomesController {
   @UsePipes(ValidationPipe)
   @HttpCode(204)
   async addMapping(@Body() mappingWriteDTO: MappingWriteDTO, @Param('username') username: string, @Param('learningObjectID') learningObjectID: string, @Param('outcomeID') outcomeID: string): Promise<void> {
+    this.checkForValidUsername(username);
+
     await this.outcomeService.addMapping(mappingWriteDTO.guidelineID, outcomeID);
   }
 
@@ -113,6 +116,21 @@ export class OutcomesController {
   @Delete('/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID/mappings/:guidelineID')
   @HttpCode(204)
   async deleteMapping(@Param('username') username: string, @Param('learningObjectID') learningObjectID: string, @Param('outcomeID') outcomeID: string, @Param('guidelineID') guidelineID: string): Promise<void> {
+    this.checkForValidUsername(username);
+
     await this.outcomeService.deleteMapping(outcomeID, guidelineID);
   }
+
+  checkForValidUsername(username: string): void {
+
+    if (username.length > 20) {
+      throw new BadRequestException('Usernames cannot contain more than 20 characters');
+    }
+
+    if (username.length < 3) {
+      throw new  BadRequestException('Usernames must be at least 3 characters');
+    }
+
+  }
+
 }

@@ -120,7 +120,20 @@ describe('When the endpoint DELETE /users/:username/learning-objects/:learningOb
 
             describe('and the username is less than 3 characters', () => {
 
-                it('should return HTTP status code 400', () => {
+                it('should return HTTP status code 400', async () => {
+
+                    const username = 'un';
+
+                    try {
+                        const response = await request
+                            .delete(`http://localhost:3000/users/${username}/learning-objects/:learningObjectID/outcomes/:outcomeID`)
+                            .set('Accept', 'application/json')
+
+                        // automatic failure if response is 200 series
+                        expect(true).toBe(false);
+                    } catch (error) {
+                        expect(error.status).toBe(400);
+                    }
                     
                 });
 
@@ -128,7 +141,20 @@ describe('When the endpoint DELETE /users/:username/learning-objects/:learningOb
 
             describe('and the username is greater than 20 characters', () => {
 
-                it('should return HTTP status code 400', () => {
+                it('should return HTTP status code 400', async () => {
+
+                    const username = 'thisusernameisverylong';
+
+                    try {
+                        const response = await request
+                            .delete(`http://localhost:3000/users/${username}/learning-objects/:learningObjectID/outcomes/:outcomeID`)
+                            .set('Accept', 'application/json')
+
+                        // automatic failure if response is 200 series
+                        expect(true).toBe(false);
+                    } catch (error) {
+                        expect(error.status).toBe(400);
+                    }
                     
                 });
 

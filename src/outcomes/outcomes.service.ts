@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { OutcomeWriteDTO } from 'src/DTO/OutcomeWrite.DTO';
-import { Outcome } from 'src/Models/Outcome.Schema';
-import { OutcomeReadDTO } from 'src/DTO/OutcomeRead.DTO';
+import { OutcomeWriteDTO } from '../DTO/OutcomeWrite.DTO';
+import { OutcomeReadDTO } from '../DTO/OutcomeRead.DTO';
 
 @Injectable()
 export class OutcomesService {
