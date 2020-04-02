@@ -37,8 +37,8 @@ FROM builder as prod
 EXPOSE 3000
 
 # jq is required for the ./uninstall-dev script
-RUN apt-get update \ 
-    apt-get install jq
+RUN apt-get update && \ 
+    apt-get install -y jq
 
 # Uninstall dev dependencies.
 # They are not needed for production image
