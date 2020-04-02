@@ -32,7 +32,7 @@ jobs:
 workflows:
     build-and-test:
       jobs:
-        - build
-        - run-functional-tests:
-            requires:
-                - build
+        # - build
+        - run-functional-tests
+            # requires:
+            #     - build
