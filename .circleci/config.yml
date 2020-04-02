@@ -21,7 +21,7 @@ jobs:
             - run:
                 name: Run Functional Test Suite
                 command: | 
-                    docker-compose -f docker-compose.functional-tests.yml
+                    docker-compose -f docker-compose.functional-tests.yml up
 
 workflows:
     build-and-test:
