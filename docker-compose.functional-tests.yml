@@ -7,7 +7,7 @@ services:
         # For CI testing, this database image will be cloned in CI
         # For Development, this repository is available in the DevBox
         volumes: 
-            - ../database-image/database-image-02-20-20:/data/db
+            - ./database-image/database-image-02-20-20:/data/db
             # - ../CLARK-DevBox/database-image/database-image-02-20-20:/data/db
 
     rabbitmq:
