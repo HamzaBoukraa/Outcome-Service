@@ -38,7 +38,7 @@ EXPOSE 3000
 
 # Uninstall dev dependencies.
 # They are not needed for production image
-RUN ./uninstall-dev
+RUN ./uninstall-dev.sh
 
 # Install tini to /tini and give it executable permission
 ADD https://github.com/krallin/tini/releases/download/v0.17.0/tini /tini
