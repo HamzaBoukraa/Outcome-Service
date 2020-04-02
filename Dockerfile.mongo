@@ -1,0 +1,16 @@
+FROM mongo:4
+
+ARG BITBUCKET_USERNAME
+ARG BITBUCKET_PASSWORD
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y git
+
+WORKDIR /database/image
+
+RUN git clone https://$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD@bitbucket.org/cyber4all-clark/database-image.git
+
+RUN chown -R mongodb:mongodb ./database-image
+
+CMD ["mongod", "--dbpath", "./database-image/database-image-02-20-20"]

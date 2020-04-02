@@ -47,8 +47,7 @@ beforeAll( async() => {
     }
 
     const username = 'skaza';
-    const learningObjectID = '5e725dfcaae30c0012c70e41';
-
+    const learningObjectID = '5aa01c5fecba9a264dcd806f';
 
     await request
         .post(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes`)
@@ -62,9 +61,6 @@ beforeAll( async() => {
         .set('Accept', 'application/json')
 
     outcomeID = response.body[0].ID
-
- 
- 
 
 });
 

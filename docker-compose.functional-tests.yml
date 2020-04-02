@@ -3,10 +3,14 @@ version: '3.7'
 services:
 
     mongodb:
-        image: mongo:4
-        volumes: 
-            - ./database-image/database-image-02-20-20:/data/db
-            # - ../CLARK-DevBox/database-image/database-image-02-20-20:/data/db
+        build:
+            context: .
+            dockerfile: Dockerfile.mongo
+            args:
+                BITBUCKET_USERNAME: "${BITBUCKET_USERNAME}"
+                BITBUCKET_PASSWORD: "${BITBUCKET_PASSWORD}"
+        ports:
+            - "27017:27017"
 
     rabbitmq:
         image: rabbitmq:3.8
@@ -40,7 +44,7 @@ services:
         build:
             context: .
             target: builder
-        command: ./wait-for-container.sh http://learning-object-service "npm run server-test"
+        command: ./wait-for-container.sh http://learning-object-service "npm run start"
         environment: 
             - DB_URI_ONION=mongodb://mongodb:27017/onion
             - DB_URI_OUTCOMES=mongodb://mongodb:27017/outcomes
