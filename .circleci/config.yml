@@ -22,9 +22,12 @@ jobs:
                 name: Clone database image
                 command: git clone https://$BITBUCKET_USERNAME:$BITBUCKET_PASSWORD@bitbucket.org/cyber4all-clark/database-image.git
             - run:
-                name: Run Functional Test Suite
-                command: | 
-                    docker-compose -f docker-compose.functional-tests.yml up
+                name: debug
+                command: ls
+            # - run:
+            #     name: Run Functional Test Suite
+            #     command: | 
+            #         docker-compose -f docker-compose.functional-tests.yml up
 
 workflows:
     build-and-test:
