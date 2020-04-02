@@ -42,7 +42,7 @@ services:
         build:
             context: .
             target: builder
-        command: ./wait-for-container.sh http://learning-object-service "npm run start"
+        command: ./wait-for-container.sh http://learning-object-service "npm run server-test"
         environment: 
             - DB_URI_ONION=mongodb://mongodb:27017/onion
             - DB_URI_OUTCOMES=mongodb://mongodb:27017/outcomes
