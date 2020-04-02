@@ -11,7 +11,7 @@ jobs:
             - run:
                 name: Build Image
                 command: | 
-                docker build -t outcome-service:$CIRCLE_SHA1 .
+                    docker build -t outcome-service:$CIRCLE_SHA1 .
     run-functional-tests:
         executor:
             name: node/default
