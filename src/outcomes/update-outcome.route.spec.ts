@@ -1,12 +1,72 @@
 import * as request from 'superagent'
+import * as jwt from 'jsonwebtoken';
 
-function getBearerToken() {
-    return 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVhOTU4MzQwMTQwNWNiMDUzMjcyY2VkMSIsInVzZXJuYW1lIjoibnZpc2FsMSIsIm5hbWUiOiJuaWNrIHZpc2FsbGkiLCJlbWFpbCI6Im52aXNhbDFAc3R1ZGVudHMudG93c29uLmVkdSIsIm9yZ2FuaXphdGlvbiI6InRvd3NvbiB1bml2ZXJzaXR5IiwiZW1haWxWZXJpZmllZCI6dHJ1ZSwiYWNjZXNzR3JvdXBzIjpbImFkbWluIiwiIl0sImlhdCI6MTU4NTE1NDEzNSwiZXhwIjoxNTg1MjQwNTM1LCJhdWQiOiJudmlzYWwxIiwiaXNzIjoiVEhJU19JU19BTl9JU1NVRVIifQ.dx07cX7wX0qP0-LSj-Pyq50ta67F26RPStWSoRhqqms';
+const authUser = {
+    username: 'cgriswold',
+    name: 'clark griswold',
+    email: 'cgriswold@clark.center',
+    organization: 'towson university',
+    emailVerified: true,
+    accessGroups: ['admin']
+};
+
+const user = {
+    username: 'ccan',
+    name: 'clark can',
+    email: 'ccan@clark.center',
+    organization: 'towson university',
+    emailVerified: true,
+    accessGroups: [],
+};
+
+export function generateUserToken(user: any) {
+    const payload = {
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      organization: user.organization,
+      emailVerified: user.emailVerified,
+      accessGroups: user.accessGroups,
+    };
+    const options = {
+      issuer: 'THIS_IS_AN_ISSUER',
+      expiresIn: 86400,
+      audience: 'https://clark.center',
+    };
+    return 'Bearer ' + jwt.sign(payload, 'THIS_IS_A_KEY', options);
 }
 
-function getUnauthorizedBearerToken() {
-    return 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlNTUzM2MxZjgyMGExMDAxMWE0NTYxOSIsInVzZXJuYW1lIjoibnZpc2FsMTIzOCIsIm5hbWUiOiJuaWNrIHZpc2FsbGkiLCJlbWFpbCI6Im52aXNhbDFAc3R1ZGVudHMudG93c29uLmVkdXV1dSIsIm9yZ2FuaXphdGlvbiI6ImJhbHRpbW9yZSIsImVtYWlsVmVyaWZpZWQiOnRydWUsImlhdCI6MTU4NTIzNTYzMiwiZXhwIjoxNTg1MzIyMDMyLCJhdWQiOiJudmlzYWwxMjM4IiwiaXNzIjoiVEhJU19JU19BTl9JU1NVRVIifQ.ZNLn8JA16g6DqLpdDxm2eDLp9uE8SNNHQq1iiMpdwY8';
-}
+let outcomeID;
+
+beforeAll( async() => {
+    // Insert necessary documents for testing
+    const body = {
+        bloom: 'remember & understand',
+        text: 'string',
+        verb: 'string',
+    }
+
+    const username = 'skaza';
+    const learningObjectID = '5e725dfcaae30c0012c70e41';
+
+
+    await request
+        .post(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes`)
+        .send(body)
+        .set('Accept', 'application/json')
+        .set('Authorization', generateUserToken(authUser))
+
+    // Get the saved Outcome and store its ID for future tests
+    const response = await request
+        .get(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes`)
+        .set('Accept', 'application/json')
+
+    outcomeID = response.body[0].ID
+
+ 
+ 
+
+});
 
 describe('When the endpoint PATCH /users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID is invoked', () => {
 
@@ -24,15 +84,65 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
                             describe('and the requested update will not result in a duplicate resource', () => {
 
-                                it('should return HTTP status code 204', () => {
-
+                                it('should return HTTP status code 204', async () => {
+                                    const body = {
+                                        bloom: 'remember & understand',
+                                        text: 'stringg',
+                                        verb: 'string',
+                                    }
+            
+                                    const username = 'skaza';
+                                    const learningObjectID = '5e725dfcaae30c0012c70e41';
+    
+                
+                                    const response = await request
+                                        .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                        .send(body)
+                                        .set('Accept', 'application/json')
+                                        .set('Authorization', generateUserToken(authUser))
+                
+                                    // automatic failure if response is 200 series
+                                    expect(response.status).toBe(204);
                                 });
 
                             });
 
                             describe('and the requested update will result in a duplicate resource', () => {
 
-                                it('should return HTTP status code 409', () => {
+                                it('should return HTTP status code 409', async () => {
+
+                                    // duplicate guideline
+                                    // two of the same id in the mappings array
+
+                                    // outcome duplicate
+                                    // bloom, verb, and text are the same
+                                    // or just match on verb and text because verb
+                                    // must exist within bloom
+
+                                    // verbs are in taxonomy package on npm
+                                    // it's being used in the builder (outcomes component) and Paige's blooming onion
+                                    const body = {
+                                        bloom: 'remember & understand',
+                                        text: 'string',
+                                        verb: 'string',
+                                    }
+            
+                                    const username = 'skaza';
+                                    const learningObjectID = '5e725dfcaae30c0012c70e41';
+                    
+                                    try {
+                                        const response = await request
+                                            .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                            .send(body)
+                                            .set('Accept', 'application/json')
+                                            .set('Authorization', generateUserToken(authUser))
+                    
+                                        // automatic failure if response is 200 series
+                                        expect(true).toBe(false);
+                                    } catch (error) {
+                                        expect(error.status).toBe(409);
+                                    }
+
 
                                 });
                             });
@@ -41,7 +151,31 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
                         describe('and the specified Outcome ID does not belong to an existing Outcome', () => {
 
-                            it('should return HTTP status code 404', () => {
+                            it('should return HTTP status code 404', async () => {
+
+                                const body = {
+                                    bloom: 'remember & understand',
+                                    text: 'string',
+                                    verb: 'string',
+                                }
+        
+                                const username = 'skaza';
+                                const learningObjectID = '5e725dfcaae30c0012c70e41';
+                                const outcomeID = '5e725dfcaae30c0012c70e41';
+
+                
+                                try {
+                                    const response = await request
+                                        .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                        .send(body)
+                                        .set('Accept', 'application/json')
+                                        .set('Authorization', generateUserToken(authUser))
+                
+                                    // automatic failure if response is 200 series
+                                    expect(true).toBe(false);
+                                } catch (error) {
+                                    expect(error.status).toBe(404);
+                                }
 
                             });
                             
@@ -51,7 +185,32 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
                     describe('and the specified Learning Object ID does not belong to an existing Learning Object', () => {
 
-                        it('should return HTTP status code 404', () => {
+                        it('should return HTTP status code 404', async () => {
+
+                            const body = {
+                                bloom: 'remember & understand',
+                                text: 'string',
+                                verb: 'string',
+                            }
+    
+                            const username = 'nvisal1';
+
+                            // Not an existing ID
+                            const learningObjectID = '5ad8f5a6824dd17351adf1a1';
+                            const outcomeID = '5ad8f5a6824dd17351adf1e1';
+            
+                            try {
+                                const response = await request
+                                    .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                    .send(body)
+                                    .set('Accept', 'application/json')
+                                    .set('Authorization', generateUserToken(authUser))
+            
+                                // automatic failure if response is 200 series
+                                expect(true).toBe(false);
+                            } catch (error) {
+                                expect(error.status).toBe(404);
+                            }
 
                         });
 
@@ -61,7 +220,31 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
                 describe('and the specified username does not belong to an existing user', () => {
 
-                    it('should return HTTP status code 404', () => {
+                    it('should return HTTP status code 404', async () => {
+
+                        const body = {
+                            bloom: 'remember & understand',
+                            text: 'string',
+                            verb: 'string',
+                        }
+
+                        const username = 'badusername';
+                        const learningObjectID = '5ad8f5a6824dd17351adf1e1';
+                        const outcomeID = '5ad8f5a6824dd17351adf1e1';
+        
+                        try {
+                            const response = await request
+                                .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                .send(body)
+                                .set('Accept', 'application/json')
+                                .set('Authorization', generateUserToken(authUser))
+        
+                            // automatic failure if response is 200 series
+                            expect(true).toBe(false);
+                        } catch (error) {
+                            expect(error.status).toBe(404);
+                        }
+
 
                     });
 
@@ -77,28 +260,28 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
 
                         it('should return HTTP status code 403', async () => {
 
-                        const body = {
-                            bloom: 'remember & understand',
-                            text: 'string',
-                            verb: 'string',
-                        }
+                            const body = {
+                                bloom: 'remember & understand',
+                                text: 'string',
+                                verb: 'string',
+                            }
 
-                        const username = 'ballen15';
-                        const learningObjectID = '5ad8f5a6824dd17351adf1e1';
-                        const outcomeID = '5ad8f5a6824dd17351adf1e1';
-        
-                        try {
-                            const response = await request
-                                .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
-                                .send(body)
-                                .set('Accept', 'application/json')
-                                .set('Authorization', getBearerToken())
-        
-                            // automatic failure if response is 200 series
-                            expect(true).toBe(false);
-                        } catch (error) {
-                            expect(error.status).toBe(403);
-                        }
+                            const username = 'ballen15';
+                            const learningObjectID = '5ad8f5a6824dd17351adf1e1';
+                            const outcomeID = '5ad8f5a6824dd17351adf1e1';
+            
+                            try {
+                                const response = await request
+                                    .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
+                                    .send(body)
+                                    .set('Accept', 'application/json')
+                                    .set('Authorization', generateUserToken(authUser))
+            
+                                // automatic failure if response is 200 series
+                                expect(true).toBe(false);
+                            } catch (error) {
+                                expect(error.status).toBe(403);
+                            }
 
                         });
 
@@ -127,7 +310,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                                     .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
                                     .send(body)
                                     .set('Accept', 'application/json')
-                                    .set('Authorization', getUnauthorizedBearerToken())
+                                    .set('Authorization', generateUserToken(user))
             
                                 // automatic failure if response is 200 series
                                 expect(true).toBe(false);
@@ -164,7 +347,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                                     .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
                                     .send(body)
                                     .set('Accept', 'application/json')
-                                    .set('Authorization', getUnauthorizedBearerToken())
+                                    .set('Authorization', generateUserToken(user))
             
                                 // automatic failure if response is 200 series
                                 expect(true).toBe(false);
@@ -200,7 +383,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                                     .patch(`http://localhost:3000/users/${username}/learning-objects/${learningObjectID}/outcomes/${outcomeID}`)
                                     .send(body)
                                     .set('Accept', 'application/json')
-                                    .set('Authorization', getUnauthorizedBearerToken())
+                                    .set('Authorization', generateUserToken(user))
             
                                 // automatic failure if response is 200 series
                                 expect(true).toBe(false);
@@ -265,7 +448,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/username/learning-objects/learningObjectID/outcomes/outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -292,7 +475,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -319,7 +502,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -346,7 +529,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -373,7 +556,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -404,7 +587,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -431,7 +614,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -458,7 +641,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -485,7 +668,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -512,7 +695,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -543,7 +726,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -570,7 +753,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -597,7 +780,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -624,7 +807,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                             .patch(`http://localhost:3000/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .send(body)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -650,7 +833,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                         const response = await request
                             .patch(`http://localhost:3000/users/${username}/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);
@@ -672,7 +855,7 @@ describe('When the endpoint PATCH /users/:username/learning-objects/:learningObj
                         const response = await request
                             .patch(`http://localhost:3000/users/${username}/learning-objects/:learningObjectID/outcomes/:outcomeID`)
                             .set('Accept', 'application/json')
-                            .set('Authorization', getBearerToken())
+                            .set('Authorization', generateUserToken(authUser))
 
                         // automatic failure if response is 200 series
                         expect(true).toBe(false);

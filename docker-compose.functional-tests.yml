@@ -1,0 +1,53 @@
+version: '3.7'
+
+services:
+
+    mongodb:
+        image: mongo:4
+        # For CI testing, this database image will be cloned in CI
+        # For Development, this repository is available in the DevBox
+        volumes: 
+            # - ../database-image/database-image-02-20-20:/data/db
+            - ../CLARK-DevBox/database-image/database-image-02-20-20:/data/db
+
+    rabbitmq:
+        image: rabbitmq:3.8
+
+    elasticsearch:
+        image: elasticsearch:6.4.0
+        environment:
+            - "transport.host=localhost"
+
+    learning-object-service:
+        image: cyber4all/learning-object-service
+        environment: 
+            - ELASTICSEARCH_DOMAIN=http://elasticsearch:9200
+            - CLARK_DB_URI_DEV=mongodb://mongodb:27017/onion
+            - AMQP_URL=amqp://rabbitmq:5672
+            - ISSUER=THIS_IS_AN_ISSUER
+            - KEY=THIS_IS_A_KEY
+            - NODE_ENV=development
+        restart: always
+
+    user-service:
+        image: cyber4all/user-service
+        environment: 
+            - CLARK_DB_URI_DEV=mongodb://mongodb:27017/onion
+            - ISSUER=THIS_IS_AN_ISSUER
+            - KEY=THIS_IS_A_KEY
+            - NODE_ENV=development
+        restart: always
+
+    outcome-service:
+        build:
+            context: .
+            target: builder
+        command: ./wait-for-container.sh http://learning-object-service "npm run server-test"
+        environment: 
+            - DB_URI_ONION=mongodb://mongodb:27017/onion
+            - DB_URI_OUTCOMES=mongodb://mongodb:27017/outcomes
+        ports:
+            - "3000:3000"
+        
+volumes:
+    notused:
