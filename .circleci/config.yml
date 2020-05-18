@@ -1,3 +1,7 @@
+defaults: &defaults
+    working_directory: ~/outcome-service
+    docker:
+        - image: cyber4all/circleci-aws:docker-git
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
@@ -12,6 +16,19 @@ jobs:
                 name: Build Image
                 command: | 
                     docker build -t outcome-service:$CIRCLE_SHA1 .
+            - run: 
+                name: Login to docker
+                command: docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
+            - run:
+                name: Publish Image 
+                command: |
+                    docker tag outcome-service:$CIRCLE_SHA1 "${DOCKER_USER_ORG}/outcome-service:${CIRCLE_SHA1}"
+                    docker push "${DOCKER_USER_ORG}/outcome-service:${CIRCLE_SHA1}"
+            - persist_to_workspace: 
+                root: ./
+                paths: 
+                    - ./package.json
+                    - ./deploy.sh
     run-functional-tests:
         executor:
             name: node/default
@@ -23,10 +40,66 @@ jobs:
                 command: | 
                     docker-compose -f docker-compose.functional-tests.yml up
 
+    deploy-production:
+        <<: *defaults
+        steps:
+            - attach_workspace: 
+                at: ~/outcome-service
+            - setup_remote_docker
+            - run:
+                name: Login to docker
+                command: docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
+            - run:
+                name: Pull Image
+                command: docker pull "${DOCKER_USER_ORG}/outcome-service:${CIRCLE_SHA1}"
+            - run:
+                name: Publish Image 
+                command: |
+                    export SEMVER=$(cat ./package.json | grep version | head -1 | awk -F= "{ print $2 }" | sed 's/[version:,\",]//g' | tr -d '[[:space:]]')
+                    docker tag "${DOCKER_USER_ORG}/outcome-service:${CIRCLE_SHA1}" "${DOCKER_USER_ORG}/outcome-service:${SEMVER}"
+                    docker push "${DOCKER_USER_ORG}/outcome-service:${SEMVER}"
+            - run:
+                name: Deploy to ECS
+                command: |
+                    export SEMVER=$(cat ./package.json | grep version | head -1 | awk -F= "{ print $2 }" | sed 's/[version:,\",]//g' | tr -d '[[:space:]]')
+                    export DOCKER_IMAGE="${DOCKER_USER_ORG}/outcome-service:${SEMVER}"
+                    chmod +x ./deploy.sh
+                    sh ./deploy.sh
+
 workflows:
     build-and-test:
-      jobs:
-        # - build
-        - run-functional-tests
-            # requires:
-            #     - build
+        jobs:
+            - build:
+                filters:
+                    branches:
+                        ignore: /master/
+            - run-functional-tests:
+                requires:
+                    - build
+                filters: 
+                    branches:
+                        ignore: /master/
+
+    build-test-deploy: 
+        jobs: 
+            - build:
+                filters:
+                    branches:
+                        only: /master/
+            - run-functional-tests:
+                requires: 
+                    - build
+                filters:
+                    branches: 
+                        only: /master/
+            - deploy-production:
+                requires: 
+                    - run-functional-tests
+                filters:
+                    branches:
+                        only: /master/ 
+
+                
+
+
+    
