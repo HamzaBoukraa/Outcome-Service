@@ -167,7 +167,7 @@ export class OutcomesController {
   async getUser(username: string) {
     try {
       const response = await request
-        .get(`http://user-service/users/${username}/profile`)
+        .get(`${process.env.USER_SERVICE_API}/users/${username}/profile`)
         .set('Accept', 'application/json')
 
       return response.body;
@@ -180,7 +180,7 @@ export class OutcomesController {
   async getLearningObject(username: string, learningObjectID: string) {
     try {
       const response = await request
-        .get(`http://learning-object-service/users/${username}/learning-objects/${learningObjectID}/outcomes`)
+        .get(`${process.env.LEARNING_OBJECT_SERVICE_API}/users/${username}/learning-objects/${learningObjectID}/outcomes`)
         .set('Accept', 'application/json')
 
       return response.body;

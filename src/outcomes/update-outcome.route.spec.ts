@@ -29,11 +29,11 @@ export function generateUserToken(user: any) {
       accessGroups: user.accessGroups,
     };
     const options = {
-      issuer: 'THIS_IS_AN_ISSUER',
+      issuer: process.env.ISSUER,
       expiresIn: 86400,
       audience: 'https://clark.center',
     };
-    return 'Bearer ' + jwt.sign(payload, 'THIS_IS_A_KEY', options);
+    return 'Bearer ' + jwt.sign(payload, process.env.KEY, options);
 }
 
 let outcomeID;
