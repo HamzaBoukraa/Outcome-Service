@@ -73,12 +73,6 @@ workflows:
                 filters:
                     branches:
                         ignore: /master/
-            - run-functional-tests:
-                requires:
-                    - build
-                filters: 
-                    branches:
-                        ignore: /master/
 
     build-test-deploy: 
         jobs: 
@@ -86,15 +80,9 @@ workflows:
                 filters:
                     branches:
                         only: /master/
-            - run-functional-tests:
-                requires: 
-                    - build
-                filters:
-                    branches: 
-                        only: /master/
             - deploy-production:
                 requires: 
-                    - run-functional-tests
+                    - build
                 filters:
                     branches:
                         only: /master/ 
