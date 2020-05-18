@@ -1,4 +1,7 @@
 defaults: &defaults
+    working_directory: ~/outcome-service
+    docker:
+        - image: cyber4all/circleci-aws:docker-git
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
