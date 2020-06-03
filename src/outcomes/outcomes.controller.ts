@@ -4,7 +4,6 @@ import { OutcomeReadDTO } from '../DTO/OutcomeRead.DTO';
 import { OutcomeWriteDTO } from '../DTO/OutcomeWrite.DTO';
 import { MappingWriteDTO } from '../DTO/MappingWrite.DTO';
 import { OutcomesService } from './outcomes.service';
-
 import * as request from 'superagent';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RouteParameterDTO } from 'src/DTO/RouteParameter.DTO';
@@ -20,10 +19,11 @@ export class OutcomesController {
   @ApiForbiddenResponse({ description: 'If the object is unreleased and requester is not the author || If the object is waiting, review, or proofing and the requester is not privileged' })
   @ApiNotFoundResponse({ description: 'User is not found || Learning Object is not found' })
   @Get('/users/:username/learning-objects/:learningObjectID/outcomes')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(200)
   async getOutcomesForLearningObject(@Param() routeParameterDTO: RouteParameterDTO): Promise<OutcomeReadDTO[]> {
-
+    
     const user = await this.getUser(routeParameterDTO.username);
 
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID);
@@ -187,7 +187,7 @@ export class OutcomesController {
 
     } catch (error) {
       if (error.status === 401) {
-        throw new ForbiddenException('You do not have permission to view the reuested Learning Object');
+        throw new ForbiddenException('You do not have permission to view the requested Learning Object');
       } else {
         throw new NotFoundException('The specified Learning Object was not found');
       }
