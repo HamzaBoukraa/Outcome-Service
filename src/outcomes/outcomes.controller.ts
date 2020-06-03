@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Post, UsePipes, ValidationPipe, Body, Patch, Delete, Param, NotFoundException, ForbiddenException, UseGuards, ConflictException } from '@nestjs/common';
+import { Controller, Get, HttpCode, Post, UsePipes, ValidationPipe, Body, Patch, Delete, Param, NotFoundException, ForbiddenException, UseGuards, ConflictException, Req } from '@nestjs/common';
 import { ApiNoContentResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiOkResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiCreatedResponse, ApiBody, ApiConflictResponse } from '@nestjs/swagger';
 import { OutcomeReadDTO } from '../DTO/OutcomeRead.DTO';
 import { OutcomeWriteDTO } from '../DTO/OutcomeWrite.DTO';
@@ -8,6 +8,7 @@ import * as request from 'superagent';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RouteParameterDTO } from 'src/DTO/RouteParameter.DTO';
 import { Outcome } from 'src/Models/Outcome.Schema';
+import { Request } from 'express';
 
 @Controller()
 export class OutcomesController {
@@ -19,14 +20,13 @@ export class OutcomesController {
   @ApiForbiddenResponse({ description: 'If the object is unreleased and requester is not the author || If the object is waiting, review, or proofing and the requester is not privileged' })
   @ApiNotFoundResponse({ description: 'User is not found || Learning Object is not found' })
   @Get('/users/:username/learning-objects/:learningObjectID/outcomes')
-  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(200)
-  async getOutcomesForLearningObject(@Param() routeParameterDTO: RouteParameterDTO): Promise<OutcomeReadDTO[]> {
-    
+  async getOutcomesForLearningObject(@Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<OutcomeReadDTO[]> {
+
     const user = await this.getUser(routeParameterDTO.username);
 
-    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID);
+    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     // TODO: add pagination
     const outcomes = await this.outcomeService.findOutcomesForLearningObject(routeParameterDTO.learningObjectID);
@@ -35,11 +35,12 @@ export class OutcomesController {
 
     outcomes.forEach(outcome => {
       const outcomeResponse: OutcomeReadDTO = {
-        ID: outcome['_id'],
+        _id: outcome['_id'],
         bloom: outcome.bloom,
         verb: outcome.verb,
         text: outcome.text,
         lastUpdated: outcome.lastUpdated,
+        mappings: outcome.mappings,
       }
 
       outcomeResponses.push(outcomeResponse);
@@ -58,11 +59,11 @@ export class OutcomesController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(201)
-  async addOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param() routeParameterDTO: RouteParameterDTO): Promise<void> {
+  async addOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
     const user = await this.getUser(routeParameterDTO.username);
 
-    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID);
+    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     await this.outcomeService.create(outcomeWriteDTO, routeParameterDTO.learningObjectID);
 
@@ -79,11 +80,11 @@ export class OutcomesController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(204)
-  async updateOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param() routeParameterDTO: RouteParameterDTO): Promise<void> {
+  async updateOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
     const user = await this.getUser(routeParameterDTO.username);
 
-    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID);
+    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
 
@@ -102,11 +103,11 @@ export class OutcomesController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(204)
-  async deleteOutcome(@Param() routeParameterDTO: RouteParameterDTO): Promise<void> {
+  async deleteOutcome(@Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
     const user = await this.getUser(routeParameterDTO.username);
 
-    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID);
+    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
 
@@ -125,11 +126,11 @@ export class OutcomesController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(204)
-  async addMapping(@Body() mappingWriteDTO: MappingWriteDTO, @Param() routeParameterDTO: RouteParameterDTO): Promise<void> {
+  async addMapping(@Body() mappingWriteDTO: MappingWriteDTO, @Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
     const user = await this.getUser(routeParameterDTO.username);
 
-    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID);
+    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
 
@@ -150,11 +151,11 @@ export class OutcomesController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   @HttpCode(204)
-  async deleteMapping(@Param() routeParameterDTO: RouteParameterDTO): Promise<void> {
+  async deleteMapping(@Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
     const user = await this.getUser(routeParameterDTO.username);
 
-    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID);
+    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
 
@@ -177,15 +178,18 @@ export class OutcomesController {
     };
   }
 
-  async getLearningObject(username: string, learningObjectID: string) {
+  async getLearningObject(username: string, learningObjectID: string, user: any) {
     try {
       const response = await request
         .get(`${process.env.LEARNING_OBJECT_SERVICE_API}/users/${username}/learning-objects/${learningObjectID}/outcomes`)
         .set('Accept', 'application/json')
+        .set('Authorization', user)
 
+      console.log(response.body)
       return response.body;
 
     } catch (error) {
+      console.log(error.status);
       if (error.status === 401) {
         throw new ForbiddenException('You do not have permission to view the requested Learning Object');
       } else {
