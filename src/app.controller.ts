@@ -1,9 +1,6 @@
-import { Controller, Get, Body, Post, Patch, Delete, UsePipes, ValidationPipe, HttpCode } from '@nestjs/common';
+import { Controller, Get, HttpCode } from '@nestjs/common';
 import { AppService } from './app.service';
-import { MappingWriteDTO } from './DTO/MappingWrite.DTO';
-import { OutcomeWriteDTO } from './DTO/OutcomeWrite.DTO';
-import { ApiBody, ApiOkResponse, ApiNotFoundResponse, ApiBadRequestResponse, ApiForbiddenResponse, ApiCreatedResponse, ApiUnauthorizedResponse, ApiConflictResponse, ApiNoContentResponse } from '@nestjs/swagger';
-import { OutcomeReadDTO } from './DTO/OutcomeRead.DTO';
+import { ApiOkResponse } from '@nestjs/swagger';
 
 @Controller()
 export class AppController {
