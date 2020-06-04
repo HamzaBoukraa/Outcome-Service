@@ -40,7 +40,7 @@ export class OutcomesController {
         verb: outcome.verb,
         text: outcome.text,
         lastUpdated: outcome.lastUpdated,
-        mappings: outcome.mappings,
+        // mappings: outcome.mappings,
       }
 
       outcomeResponses.push(outcomeResponse);
@@ -185,11 +185,9 @@ export class OutcomesController {
         .set('Accept', 'application/json')
         .set('Authorization', user)
 
-      console.log(response.body)
       return response.body;
 
     } catch (error) {
-      console.log(error.status);
       if (error.status === 401) {
         throw new ForbiddenException('You do not have permission to view the requested Learning Object');
       } else {
@@ -214,7 +212,7 @@ export class OutcomesController {
     if (!guideline) {
       throw new NotFoundException('The specified Guideline was not found');
     }
-
+    
     return guideline;
   }
 
@@ -228,7 +226,7 @@ export class OutcomesController {
 
   checkForDuplicateMapping(outcome: Outcome, newGuidelineID: string) {
     if (outcome.mappings.includes(newGuidelineID)) {
-      throw new ConflictException('The specified Guideline is already mapped to the specified Outcomee');
+      throw new ConflictException('The specified Guideline is already mapped to the specified Outcome');
     }
   }
 }
