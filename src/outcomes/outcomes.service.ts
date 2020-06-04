@@ -47,7 +47,7 @@ export class OutcomesService {
     }
 
     async getGuideline(guidelineID: string) {
-        return this.guidelineModel.findOne({ _id: new Types.ObjectId(guidelineID) });
+        return this.guidelineModel.findOne({ _id: guidelineID });
     }
 
 }
