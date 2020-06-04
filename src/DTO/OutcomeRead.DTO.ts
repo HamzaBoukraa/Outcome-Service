@@ -6,5 +6,5 @@ export class OutcomeReadDTO {
     verb: string;
     text: string;
     lastUpdated: Date;
-    // mappings: [GuidelineDTO];
+    mappings: GuidelineDTO[];
 }

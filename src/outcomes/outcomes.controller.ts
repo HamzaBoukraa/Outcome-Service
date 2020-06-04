@@ -9,6 +9,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { RouteParameterDTO } from 'src/DTO/RouteParameter.DTO';
 import { Outcome } from 'src/Models/Outcome.Schema';
 import { Request } from 'express';
+import { GuidelineDTO } from 'src/DTO/GuidelineReadDTO';
 
 @Controller()
 export class OutcomesController {
@@ -32,6 +33,25 @@ export class OutcomesController {
     const outcomes = await this.outcomeService.findOutcomesForLearningObject(routeParameterDTO.learningObjectID);
 
     const outcomeResponses = [];
+    const guidelineMappings = [];
+
+    for(let i=0; i < outcomes.length; i++) {
+      if (outcomes[i].mappings.length > 0) {
+        for(let j=0; j < outcomes[i].mappings.length; j++){
+          const map = await this.getGuideline(outcomes[i].mappings[j]);
+          const guideline: GuidelineDTO = {
+            _id: map._id,
+            author: map.author,
+            date: map.date,
+            outcome: map.outcome,
+            source: map.source,
+            tag: map.tag,
+            name: map.name,
+          }
+          guidelineMappings.push(guideline);
+        }
+      }
+    }
 
     outcomes.forEach(outcome => {
       const outcomeResponse: OutcomeReadDTO = {
@@ -40,7 +60,7 @@ export class OutcomesController {
         verb: outcome.verb,
         text: outcome.text,
         lastUpdated: outcome.lastUpdated,
-        // mappings: outcome.mappings,
+        mappings: guidelineMappings,
       }
 
       outcomeResponses.push(outcomeResponse);
