@@ -39,16 +39,18 @@ export class OutcomesController {
       if (outcomes[i].mappings.length > 0) {
         for(let j=0; j < outcomes[i].mappings.length; j++){
           const map = await this.getGuideline(outcomes[i].mappings[j]);
-          const guideline: GuidelineDTO = {
-            _id: map._id,
-            author: map.author,
-            date: map.date,
-            outcome: map.outcome,
-            source: map.source,
-            tag: map.tag,
-            name: map.name,
+          if (map) {
+            const guideline: GuidelineDTO = {
+              _id: map._id,
+              author: map.author,
+              date: map.date,
+              outcome: map.outcome,
+              source: map.source,
+              tag: map.tag,
+              name: map.name,
+            }
+            guidelineMappings.push(guideline);
           }
-          guidelineMappings.push(guideline);
         }
       }
     }
@@ -80,10 +82,12 @@ export class OutcomesController {
   @UsePipes(ValidationPipe)
   @HttpCode(201)
   async addOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
-
+    console.log('adding')
     const user = await this.getUser(routeParameterDTO.username);
-
+    console.log(user);
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
+
+    console.log(learningObject);
 
     await this.outcomeService.create(outcomeWriteDTO, routeParameterDTO.learningObjectID);
 
@@ -201,10 +205,10 @@ export class OutcomesController {
   async getLearningObject(username: string, learningObjectID: string, user: any) {
     try {
       const response = await request
-        .get(`${process.env.LEARNING_OBJECT_SERVICE_API}/users/${username}/learning-objects/${learningObjectID}/outcomes`)
+        .get(`${process.env.LEARNING_OBJECT_SERVICE_API}/users/${username}/learning-objects/${learningObjectID}`)
         .set('Accept', 'application/json')
         .set('Authorization', user)
-
+        
       return response.body;
 
     } catch (error) {
@@ -228,10 +232,6 @@ export class OutcomesController {
 
   async getGuideline(guidelineID: string) {
     const guideline = await this.outcomeService.getGuideline(guidelineID);
-
-    if (!guideline) {
-      throw new NotFoundException('The specified Guideline was not found');
-    }
     
     return guideline;
   }
