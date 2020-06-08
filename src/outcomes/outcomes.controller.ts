@@ -33,10 +33,11 @@ export class OutcomesController {
     const outcomes = await this.outcomeService.findOutcomesForLearningObject(routeParameterDTO.learningObjectID);
 
     const outcomeResponses = [];
-    const guidelineMappings = [];
+    let guidelineMappings = [];
 
     for(let i=0; i < outcomes.length; i++) {
       if (outcomes[i].mappings.length > 0) {
+        guidelineMappings = [];
         for(let j=0; j < outcomes[i].mappings.length; j++){
           const map = await this.getGuideline(outcomes[i].mappings[j]);
           if (map) {
@@ -52,21 +53,17 @@ export class OutcomesController {
             guidelineMappings.push(guideline);
           }
         }
+        const outcomeResponse: OutcomeReadDTO = {
+          _id: outcomes[i]['_id'],
+          bloom: outcomes[i].bloom,
+          verb: outcomes[i].verb,
+          text: outcomes[i].text,
+          lastUpdated: outcomes[i].lastUpdated,
+          mappings: guidelineMappings,
+        }
+        outcomeResponses.push(outcomeResponse);
       }
     }
-
-    outcomes.forEach(outcome => {
-      const outcomeResponse: OutcomeReadDTO = {
-        _id: outcome['_id'],
-        bloom: outcome.bloom,
-        verb: outcome.verb,
-        text: outcome.text,
-        lastUpdated: outcome.lastUpdated,
-        mappings: guidelineMappings,
-      }
-
-      outcomeResponses.push(outcomeResponse);
-    });
 
     return outcomeResponses;
   }
@@ -148,8 +145,8 @@ export class OutcomesController {
   @ApiConflictResponse({ description: 'Update would create a duplicate' })
   @ApiBody({ type: MappingWriteDTO })
   @Post('/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID/mappings')
-  @UseGuards(JwtAuthGuard)
-  @UsePipes(ValidationPipe)
+  // @UseGuards(JwtAuthGuard)
+  // @UsePipes(ValidationPipe)
   @HttpCode(204)
   async addMapping(@Body() mappingWriteDTO: MappingWriteDTO, @Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
@@ -163,7 +160,7 @@ export class OutcomesController {
 
     this.checkForDuplicateMapping(outcome, mappingWriteDTO.guidelineID);
 
-    await this.outcomeService.addMapping(mappingWriteDTO.guidelineID, routeParameterDTO.outcomeID);
+    await this.outcomeService.addMapping(routeParameterDTO.outcomeID, mappingWriteDTO.guidelineID);
 
   }
 

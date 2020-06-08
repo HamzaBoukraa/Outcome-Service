@@ -13,7 +13,6 @@ export class MappingWriteDTO {
     @IsDefined()
     @IsNotEmpty()
     @IsString()
-    @IsMongoId()
     guidelineID: string
 
 }

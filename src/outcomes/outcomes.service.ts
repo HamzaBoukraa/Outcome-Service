@@ -31,10 +31,9 @@ export class OutcomesService {
     }
 
     async addMapping(outcomeID: string, guidelineID: string) {
-        const remappings = this.outcomeModel.find({ _id: outcomeID });
-        console.log(remappings);
-        const createdMapping = new this.outcomeModel({mappings: remappings})
-        return createdMapping.save();
+        const remappings = await this.outcomeModel.findOne({ _id: new Types.ObjectId(outcomeID) }).exec();
+        remappings.mappings.push(guidelineID);
+        return this.outcomeModel.updateOne({ _id: new Types.ObjectId(outcomeID)}, { $set: {mappings: remappings.mappings, lastUpdated: Date.now()}});
     }
 
     async deleteMapping(outcomeID: string, guidelineID: string) {
