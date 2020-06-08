@@ -50,6 +50,7 @@ export class OutcomesController {
               tag: map.tag,
               name: map.name,
             }
+            console.log(guideline);
             guidelineMappings.push(guideline);
           }
         }
@@ -68,7 +69,6 @@ export class OutcomesController {
     return outcomeResponses;
   }
 
-  @ApiCreatedResponse({ description: 'Created' })
   @ApiBadRequestResponse({ description: 'Invalid bloom || Invalid verb || Invalid username'})
   @ApiUnauthorizedResponse({ description: 'If the requester is not signed in' })
   @ApiForbiddenResponse({ description: 'If the Learning Object is unreleased and the requester is not the author || If the Learning Object is in waiting, review, or proofing and requester is not privileged || If the object is released' })
@@ -85,6 +85,7 @@ export class OutcomesController {
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     const outcomeID = this.outcomeService.create(outcomeWriteDTO, routeParameterDTO.learningObjectID);
+    
     return outcomeID;
 
   }
@@ -107,12 +108,12 @@ export class OutcomesController {
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
-    console.log(outcomeWriteDTO);
+
     await this.outcomeAlreadyExists(outcomeWriteDTO, routeParameterDTO.learningObjectID);
 
-    const output = this.outcomeService.update(outcomeWriteDTO, routeParameterDTO.outcomeID);
+    const outcomeId = this.outcomeService.update(outcomeWriteDTO, routeParameterDTO.outcomeID);
 
-    return output;
+    return outcomeId;
 
   }
 
@@ -145,8 +146,8 @@ export class OutcomesController {
   @ApiConflictResponse({ description: 'Update would create a duplicate' })
   @ApiBody({ type: MappingWriteDTO })
   @Post('/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID/mappings')
-  // @UseGuards(JwtAuthGuard)
-  // @UsePipes(ValidationPipe)
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
   @HttpCode(204)
   async addMapping(@Body() mappingWriteDTO: MappingWriteDTO, @Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
@@ -160,7 +161,9 @@ export class OutcomesController {
 
     this.checkForDuplicateMapping(outcome, mappingWriteDTO.guidelineID);
 
-    await this.outcomeService.addMapping(routeParameterDTO.outcomeID, mappingWriteDTO.guidelineID);
+    outcome.mappings.push(guideline.id);
+
+    await this.outcomeService.setMappings(outcome);
 
   }
 
@@ -183,7 +186,10 @@ export class OutcomesController {
 
     const guideline = await this.getGuideline(routeParameterDTO.guidelineID);
     
-    await this.outcomeService.deleteMapping(routeParameterDTO.outcomeID, routeParameterDTO.guidelineID);
+    const i = outcome.mappings.indexOf(routeParameterDTO.guidelineID);
+    outcome.mappings.splice(i, 1);
+
+    await this.outcomeService.setMappings(outcome);
 
   }
 
