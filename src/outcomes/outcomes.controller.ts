@@ -26,7 +26,7 @@ export class OutcomesController {
   async getOutcomesForLearningObject(@Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<OutcomeReadDTO[]> {
 
     const user = await this.getUser(routeParameterDTO.username);
-
+  
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     // TODO: add pagination
@@ -80,16 +80,15 @@ export class OutcomesController {
   @Post('/users/:username/learning-objects/:learningObjectID/outcomes')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  @HttpCode(201)
+  @HttpCode(200)
   async addOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
-    console.log('adding')
+
     const user = await this.getUser(routeParameterDTO.username);
-    console.log(user);
+
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
-    console.log(learningObject);
-
-    await this.outcomeService.create(outcomeWriteDTO, routeParameterDTO.learningObjectID);
+    const outcomeID = this.outcomeService.create(outcomeWriteDTO, routeParameterDTO.learningObjectID);
+    return outcomeID;
 
   }
 
@@ -103,7 +102,7 @@ export class OutcomesController {
   @Patch('/users/:username/learning-objects/:learningObjectID/outcomes/:outcomeID')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  @HttpCode(204)
+  @HttpCode(200)
   async updateOutcome(@Body() outcomeWriteDTO: OutcomeWriteDTO, @Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
     const user = await this.getUser(routeParameterDTO.username);
@@ -111,10 +110,12 @@ export class OutcomesController {
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
+    console.log(outcomeWriteDTO);
+    await this.outcomeAlreadyExists(outcomeWriteDTO, routeParameterDTO.learningObjectID);
 
-    await this.outcomeAlreadyExists(outcomeWriteDTO);
+    const output = this.outcomeService.update(outcomeWriteDTO, routeParameterDTO.outcomeID);
 
-    await this.outcomeService.update(outcomeWriteDTO, routeParameterDTO.outcomeID);
+    return output;
 
   }
 
@@ -208,7 +209,7 @@ export class OutcomesController {
         .get(`${process.env.LEARNING_OBJECT_SERVICE_API}/users/${username}/learning-objects/${learningObjectID}`)
         .set('Accept', 'application/json')
         .set('Authorization', user)
-        
+
       return response.body;
 
     } catch (error) {
@@ -236,8 +237,9 @@ export class OutcomesController {
     return guideline;
   }
 
-  async outcomeAlreadyExists(newOutcome) {
-    const existingOutcome = await this.outcomeService.findExactOutcomeMatch(newOutcome);
+  async outcomeAlreadyExists(newOutcome, learningObjectID) {
+    console.log('new', newOutcome);
+    const existingOutcome = await this.outcomeService.findExactOutcomeMatch(newOutcome, learningObjectID);
 
     if (existingOutcome) {
       throw new ConflictException('The specified Outcome already exists');

@@ -9,12 +9,12 @@ export class OutcomeWriteDTO {
         required: true,
         type: String,
         isArray: true, // Set true for Open API enum dropdown menu
-        enum: ['remember & understand', 'apply & analyze', 'evaluate & synthesize'],
+        enum: ['remember and understand', 'apply and analyze', 'evaluate and synthesize'],
     })
     @IsDefined()
     @IsNotEmpty()
     @IsString()
-    @IsIn(['remember & understand', 'apply & analyze', 'evaluate & synthesize'])
+    @IsIn(['remember and understand', 'apply and analyze', 'evaluate and synthesize'])
     bloom: string;
 
 
@@ -28,8 +28,6 @@ export class OutcomeWriteDTO {
         isArray: false,
         maxLength: 1000,
     })
-    @IsDefined()
-    @IsNotEmpty()
     @IsString()
     @MaxLength(1000)
     text: string;
