@@ -50,7 +50,6 @@ export class OutcomesController {
               tag: map.tag,
               name: map.name,
             }
-            console.log(guideline);
             guidelineMappings.push(guideline);
           }
         }
@@ -241,7 +240,6 @@ export class OutcomesController {
   }
 
   async outcomeAlreadyExists(newOutcome, learningObjectID) {
-    console.log('new', newOutcome);
     const existingOutcome = await this.outcomeService.findExactOutcomeMatch(newOutcome, learningObjectID);
 
     if (existingOutcome) {
