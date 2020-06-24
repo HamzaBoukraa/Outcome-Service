@@ -52,6 +52,7 @@ export class OutcomesController {
             }
             guidelineMappings.push(guideline);
           }
+         }
         }
         const outcomeResponse: OutcomeReadDTO = {
           _id: outcomes[i]['_id'],
@@ -62,9 +63,7 @@ export class OutcomesController {
           mappings: guidelineMappings,
         }
         outcomeResponses.push(outcomeResponse);
-      }
     }
-
     return outcomeResponses;
   }
 
