@@ -7,7 +7,8 @@ const verbs = {
 }
 /**
  * This decorator will take the bloom and verb and validate the verb exists in the list of verbs
- * for that bloom
+ * for that bloom.
+ * Reference class-validator docs: https://github.com/typestack/class-validator
  * @param bloom The bloom of the outcome
  * @param validationOptions 
  */
