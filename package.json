@@ -21,6 +21,7 @@
     "server-test": "start-server-and-test start http://localhost:3000 test"
   },
   "dependencies": {
+    "@cyber4all/clark-taxonomy": "^4.0.2",
     "@nestjs/common": "^6.10.14",
     "@nestjs/config": "^0.4.0",
     "@nestjs/core": "^6.10.14",
