@@ -1,7 +1,7 @@
 import { Schema, Types } from 'mongoose';
 
 export const OutcomeSchema = new Schema({
-    ID: Types.ObjectId,
+    _id: Types.ObjectId,
     learningObjectId: String,
     bloom: String,
     verb: String,
@@ -14,7 +14,7 @@ export const OutcomeSchema = new Schema({
 });
 
 export interface Outcome {
-    ID: string;
+    _id: string;
     learningObjectID: string;
     bloom: string;
     verb: string;

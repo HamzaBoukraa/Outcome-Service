@@ -1,8 +1,10 @@
+import { GuidelineDTO } from "./GuidelineReadDTO";
+
 export class OutcomeReadDTO {
-    ID: string;
+    _id: string;
     bloom: string;
     verb: string;
     text: string;
     lastUpdated: Date;
-    // mappings: [Guidelines]
+    mappings: GuidelineDTO[];
 }

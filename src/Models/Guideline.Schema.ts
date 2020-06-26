@@ -1,7 +1,7 @@
 import { Schema, Types } from 'mongoose';
 
 export const GuidelineSchema = new Schema({
-    ID: Types.ObjectId,
+    _id: String,
     author: String,
     date: Number,
     outcome: String,

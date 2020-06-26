@@ -17,12 +17,12 @@ export class OutcomesService {
     }
 
     async create(outcomeWriteDTO: OutcomeWriteDTO, learningObjectId: string ): Promise<void> {
-      const createdOutcome = new this.outcomeModel({ ...outcomeWriteDTO, learningObjectId, lastUpdated: Date.now() });
-      return createdOutcome.save();
+      const createdOutcome = new this.outcomeModel({ ...outcomeWriteDTO, learningObjectId, lastUpdated: Date.now(), _id: new Types.ObjectId() });
+      await createdOutcome.save();
+      return createdOutcome.id;
     }
 
     async update(outcomeWriteDTO: OutcomeWriteDTO, outcomeID: string): Promise<void> {
-
         await this.outcomeModel.updateOne({ _id: new Types.ObjectId(outcomeID) }, { $set: { ...outcomeWriteDTO, lastUpdated: Date.now() }});
     }
 
@@ -30,24 +30,20 @@ export class OutcomesService {
         await this.outcomeModel.deleteOne({ _id: outcomeID });
     }
 
-    async addMapping(outcomeID: string, guidelineID: string) {
-
-    }
-
-    async deleteMapping(outcomeID: string, guidelineID: string) {
-
+    async setMappings(outcome: OutcomeReadDTO) {
+        return this.outcomeModel.updateOne({ _id: new Types.ObjectId(outcome._id)}, { $set: {mappings: outcome.mappings, lastUpdated: Date.now()}});
     }
 
     async findOne(outcomeID: string) {
         return this.outcomeModel.findOne({ _id: new Types.ObjectId(outcomeID) });
     }
 
-    async findExactOutcomeMatch(outcomeWriteDTO: OutcomeWriteDTO) {
-        return this.outcomeModel.findOne({ verb: outcomeWriteDTO.verb, text: outcomeWriteDTO.text, bloom: outcomeWriteDTO.bloom });
+    async findExactOutcomeMatch(outcomeWriteDTO: OutcomeWriteDTO, learningObjectID: string) {
+        return this.outcomeModel.findOne({ verb: outcomeWriteDTO.verb, text: outcomeWriteDTO.text, bloom: outcomeWriteDTO.bloom, learningObjectID: learningObjectID });
     }
 
     async getGuideline(guidelineID: string) {
-        return this.guidelineModel.findOne({ _id: new Types.ObjectId(guidelineID) });
+        return this.guidelineModel.findOne({ _id: guidelineID });
     }
 
 }
