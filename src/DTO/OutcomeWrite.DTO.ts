@@ -1,8 +1,31 @@
 import { IsNotEmpty, IsDefined, IsString, IsIn, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-
+import { taxonomy } from '@cyber4all/clark-taxonomy';
+import { IsVerbInBloom } from './verbValidation';
+const verbs = {
+    'remember and understand': taxonomy.taxons['remember and understand'].verbs,
+    'apply and analyze': taxonomy.taxons['apply and analyze'].verbs,
+    'evaluate and synthesize': taxonomy.taxons['evaluate and synthesize'].verbs,
+}
 export class OutcomeWriteDTO {
 
+
+    @ApiProperty({
+        name: 'verb',
+        description: 'Verb within given Bloom\'s Taxonomy for the Learning Outcome',
+        required: true,
+        type: String,
+        isArray: false,
+    })
+    @IsDefined()
+    @IsNotEmpty()
+    @IsString()
+    verb: string;
+    @IsVerbInBloom("verb", {
+        message: "Verb must be in list of verbs for Bloom",
+    })
+
+    
     @ApiProperty({
         name: 'bloom',
         description: 'Bloom\'s Taxonomy for the Learning Outcome',
@@ -18,8 +41,6 @@ export class OutcomeWriteDTO {
     bloom: string;
 
 
-
-
     @ApiProperty({
         name: 'text',
         description: 'Text for the Learning Outcome',
@@ -31,20 +52,5 @@ export class OutcomeWriteDTO {
     @IsString()
     @MaxLength(1000)
     text: string;
- 
-
-
-
-    @ApiProperty({
-        name: 'verb',
-        description: 'Verb within given Bloom\'s Taxonomy for the Learning Outcome',
-        required: true,
-        type: String,
-        isArray: false,
-    })
-    @IsDefined()
-    @IsNotEmpty()
-    @IsString()
-    verb: string; // TODO: required, must be a verb within the list for the selected bloom
 
 }
