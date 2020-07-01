@@ -82,6 +82,8 @@ export class OutcomesController {
 
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
+    const update = await this.updateLearningObjectDate(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
+
     const outcomeID = this.outcomeService.create(outcomeWriteDTO, routeParameterDTO.learningObjectID);
     
     return outcomeID;
@@ -107,6 +109,8 @@ export class OutcomesController {
 
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
 
+    const update = await this.updateLearningObjectDate(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
+
     await this.outcomeAlreadyExists(outcomeWriteDTO, routeParameterDTO.learningObjectID);
 
     const outcomeId = this.outcomeService.update(outcomeWriteDTO, routeParameterDTO.outcomeID);
@@ -131,6 +135,8 @@ export class OutcomesController {
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
+
+    const update = await this.updateLearningObjectDate(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
     await this.outcomeService.delete(routeParameterDTO.outcomeID);
 
@@ -159,6 +165,8 @@ export class OutcomesController {
 
     this.checkForDuplicateMapping(outcome, mappingWriteDTO.guidelineID);
 
+    const update = await this.updateLearningObjectDate(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
+
     outcome.mappings.push(guideline.id);
 
     await this.outcomeService.setMappings(outcome);
@@ -183,6 +191,8 @@ export class OutcomesController {
     const outcome = await this.getOutcome(routeParameterDTO.outcomeID);
 
     const guideline = await this.getGuideline(routeParameterDTO.guidelineID);
+
+    const update = await this.updateLearningObjectDate(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
     
     const i = outcome.mappings.indexOf(routeParameterDTO.guidelineID);
     outcome.mappings.splice(i, 1);
@@ -220,6 +230,20 @@ export class OutcomesController {
         throw new NotFoundException('The specified Learning Object was not found');
       }
     };
+  }
+
+  async updateLearningObjectDate(username: string, learningObjectId: string, user: any) {
+    try {
+      const response = await request
+        .patch(`${process.env.LEARNING_OBJECT_SERVICE_API}/users/${username}/learning-objects/${learningObjectId}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', user)
+        .send({"learningObject": {}})
+
+      return response.body;
+    } catch (error) {
+       console.log(error);
+    }
   }
 
   async getOutcome(outcomeID: string) {
