@@ -10,7 +10,6 @@ import { RouteParameterDTO } from 'src/DTO/RouteParameter.DTO';
 import { Outcome } from 'src/Models/Outcome.Schema';
 import { Request } from 'express';
 import { GuidelineDTO } from 'src/DTO/GuidelineReadDTO';
-import { Stats } from 'fs';
 
 @Controller()
 export class OutcomesController {
