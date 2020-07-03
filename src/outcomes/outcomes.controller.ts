@@ -279,7 +279,11 @@ export class OutcomesController {
 
       return response.body;
     } catch (error) {
-       console.log(error);
+      if (error.status === 401) {
+        throw new ForbiddenException('You do not have permission to update the requested Learning Object');
+      } else if (error.status === 404) {
+        throw new NotFoundException('The specified Learning Object was not found');
+      }
     }
   }
 
