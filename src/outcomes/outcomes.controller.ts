@@ -67,6 +67,25 @@ export class OutcomesController {
     return outcomeResponses;
   }
 
+  @ApiOkResponse({ description: 'OK' })
+  @ApiBadRequestResponse({ description: 'Invalid username' })
+  @ApiForbiddenResponse({ description: 'If the object is unreleased and requester is not the author || If the object is waiting, review, or proofing and the requester is not privileged' })
+  @ApiNotFoundResponse({ description: 'User is not found || Learning Object is not found' })
+  @Delete('/users/:username/learning-objects/:learningObjectID/outcomes')
+  @UsePipes(ValidationPipe)
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
+  async deleteOutcomesForLearningObject(@Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<OutcomeReadDTO[]> {
+
+    const user = await this.getUser(routeParameterDTO.username);
+  
+    const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
+
+    const outcomes = await this.outcomeService.findOutcomesForLearningObject(routeParameterDTO.learningObjectID);
+     
+    await this.outcomeService.deleteOutcomesForLearningObject(routeParameterDTO.learningObjectID);
+  }
+
   @ApiBadRequestResponse({ description: 'Invalid bloom || Invalid verb || Invalid username'})
   @ApiUnauthorizedResponse({ description: 'If the requester is not signed in' })
   @ApiForbiddenResponse({ description: 'If the Learning Object is unreleased and the requester is not the author || If the Learning Object is in waiting, review, or proofing and requester is not privileged || If the object is released' })
