@@ -201,6 +201,43 @@ export class OutcomesController {
 
   }
 
+  @ApiOkResponse({ description: 'OK' })
+  @Get('/outcomes/stats')
+  @HttpCode(200)
+  async getStats() {
+    const BLOOMS = {
+      APPLY: 'Apply and Analyze',
+      EVALUATE: 'Evaluate and Synthesize',
+      REMEMBER: 'Remember and Understand',
+    };
+
+    const outcomes = await this.outcomeService.getStats();
+
+    const stats = {
+      apply: 0,
+      evaluate: 0,
+      remember: 0,
+    };
+
+    if (outcomes && outcomes.length) {
+      outcomes.forEach(outcome => {
+        switch(outcome.bloom) {
+          case BLOOMS.APPLY:
+            stats.apply++;
+            break;
+          case BLOOMS.EVALUATE:
+            stats.evaluate++;
+            break;
+          case BLOOMS.REMEMBER:
+            stats.remember++;
+        }
+      })
+    }
+
+    return stats;
+  }
+
+
   async getUser(username: string) {
     try {
       const response = await request

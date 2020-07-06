@@ -46,4 +46,8 @@ export class OutcomesService {
         return this.guidelineModel.findOne({ _id: guidelineID });
     }
 
+    async getStats() {
+        return this.outcomeModel.find().exec();
+    }
+
 }
