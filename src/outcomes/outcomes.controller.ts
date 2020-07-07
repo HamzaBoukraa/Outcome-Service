@@ -78,6 +78,7 @@ export class OutcomesController {
   async deleteOutcomesForLearningObject(@Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
 
     const user = await this.getUser(routeParameterDTO.username);
+    console.log(user);
   
     const learningObject = await this.getLearningObject(routeParameterDTO.username, routeParameterDTO.learningObjectID, request.headers.authorization);
 
