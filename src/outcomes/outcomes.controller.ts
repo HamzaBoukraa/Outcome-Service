@@ -75,7 +75,7 @@ export class OutcomesController {
   @UsePipes(ValidationPipe)
   @UseGuards(JwtAuthGuard)
   @HttpCode(204)
-  async deleteOutcomesForLearningObject(@Param() routeParameterDTO: RouteParameterDTO, @Req() request: Request): Promise<void> {
+  async deleteOutcomesForLearningObject(@Param() routeParameterDTO: RouteParameterDTO): Promise<void> {
 
     const user = await this.getUser(routeParameterDTO.username);
 
